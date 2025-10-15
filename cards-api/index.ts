@@ -16,22 +16,25 @@ db.prepare(`
 `).run();
 
 app.post('/cards', async (req: any) => {
-    const { front, back } = req.body;
-    db.prepare('INSERT INTO cards(front, back) VALUES (?, ?)').run(front, back);
-    return { status: 'ok', message: 'Card was added'}
+  const { front, back } = req.body;
+  db.prepare('INSERT INTO cards(front, back) VALUES (?, ?)').run(front, back);
+  return { status: 'ok', message: 'Card was added' }
 })
 
 app.get('/cards/next', async () => {
-    const cards = db.prepare('SELECT * FROM cards ORDER BY difficulty ASC LIMIT 5').all();
-    return { cards };
+  const cards = db.prepare('SELECT * FROM cards ORDER BY difficulty ASC LIMIT 5').all();
+  return { cards };
 })
 
 app.post('/cards/:id/review', async (req: any) => {
-    const { remembered } = req.body;
-    console.log('remembered', remembered)
-    const cardId = +req.params.id;
-    db.prepare('INSERT INTO reviews(card_id, result) VALUES (?, ?)').run(cardId, remembered ? 1 : 0);
-    return { ok: true };
+  const { remembered } = req.body;
+  console.log('remembered', remembered)
+  const cardId = +req.params.id;
+  db.prepare('INSERT INTO reviews(card_id, result) VALUES (?, ?)').run(cardId, remembered ? 1 : 0);
+  // Append a new entry to the Redis stream `reviews` with a server-generated ID ('*').
+  // Fields: 'card_id' (string) and 'remembered' ('1' or '0' as strings).
+  await redis.xadd('reviews', '*', 'card_id', String(cardId), 'remembered', remembered ? '1' : '0');
+  return { ok: true };
 })
 
 app.listen({ port: 3000, host: '0.0.0.0' });
