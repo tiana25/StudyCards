@@ -28,7 +28,6 @@ app.get('/cards/next', async () => {
 
 app.post('/cards/:id/review', async (req: any) => {
   const { remembered } = req.body;
-  console.log('remembered', remembered)
   const cardId = +req.params.id;
   db.prepare('INSERT INTO reviews(card_id, result) VALUES (?, ?)').run(cardId, remembered ? 1 : 0);
   // Append a new entry to the Redis stream `reviews` with a server-generated ID ('*').
