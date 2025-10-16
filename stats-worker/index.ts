@@ -41,7 +41,7 @@ async function processBatch() {
 }
 
 async function loop() {
-  await processBatch();
+  while (true) await processBatch();
 }
 
 loop()
