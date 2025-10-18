@@ -81,7 +81,7 @@ export default function StudyPage() {
   if (currentIndex >= cards.length) {
     return (
       <div className="text-center">
-        <div className="text-6xl mb-6">🎉</div>
+        <div className="text-6xl mb-6">Congrats!</div>
         <h2 className="text-white text-3xl font-bold mb-8">
           You're done for now!
         </h2>
