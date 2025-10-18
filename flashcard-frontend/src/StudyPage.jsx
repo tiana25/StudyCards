@@ -59,8 +59,6 @@ export default function StudyPage() {
     }
   };
 
-  const currentCard = cards.length ? cards[currentIndex] : null;
-
   if (loading) {
     return <div className="text-white text-xl">Loading cards...</div>;
   }
@@ -78,6 +76,26 @@ export default function StudyPage() {
       </div>
     );
   }
+
+  //Completion state
+  if (currentIndex >= cards.length) {
+    return (
+      <div className="text-center">
+        <div className="text-6xl mb-6">🎉</div>
+        <h2 className="text-white text-3xl font-bold mb-8">
+          You're done for now!
+        </h2>
+        <button
+          onClick={fetchCards}
+          className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white text-lg rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-purple-500/50"
+        >
+          Review Again
+        </button>
+      </div>
+    );
+  }
+
+  const currentCard = cards.length ? cards[currentIndex] : null;
 
   return (
     <div className="w-full max-w-2xl">
