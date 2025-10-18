@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 
 const API_BASE = "http://localhost:3000"; //Backend url
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export default function StudyPage() {
   const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -17,7 +15,6 @@ export default function StudyPage() {
   }, []);
 
   const fetchCards = async () => {
-    await sleep(5000);
     setLoading(true);
     setError(null);
     try {
