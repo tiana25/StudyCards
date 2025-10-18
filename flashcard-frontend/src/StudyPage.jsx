@@ -14,17 +14,21 @@ export default function StudyPage() {
     fetchCards();
   }, []);
 
-  const fetchCards = () => {
+  const fetchCards = async () => {
     setLoading(true);
     setError(null);
-    const fetchedCards = [
-      { id: 1, front: "gurka", back: "cucumber", difficulty: 0 },
-      { id: 2, front: "honung", back: "honey", difficulty: 75 },
-    ];
-    setLoading(false);
-    setCards(fetchedCards);
-    setCurrentIndex(0);
-    setShowAnswer(false);
+    try {
+      const res = await fetch(`${API_BASE}/cards/next`);
+      if (!res.ok) throw new Error("Failed to fetch cards");
+      const data = await res.json();
+      setCards(data.cards || []);
+      setCurrentIndex(0);
+      setShowAnswer(false);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReview = () => {
@@ -32,6 +36,22 @@ export default function StudyPage() {
   };
 
   const currentCard = cards.length ? cards[currentIndex] : null;
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="text-red-400 text-xl mb-4">{error}</div>
+          <button
+            onClick={fetchCards}
+            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center p-4">
