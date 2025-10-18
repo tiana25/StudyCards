@@ -1,10 +1,15 @@
 import Fastify from 'fastify';
 import { Redis } from 'ioredis';
 import { createRequire } from 'module';
+import cors from '@fastify/cors'
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
-const app = Fastify();
+const app = Fastify({ logger: true });
+
+await app.register(cors, {
+  origin: 'http://localhost:5173'
+})
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 const db = new Database('cards.db');
 
