@@ -6,6 +6,17 @@ import { fileURLToPath } from 'url';
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
+// --- Setup Redis + DB ---
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+// Resolve a shared cards.db path so this worker opens the same DB the API created.
+// Use CARDS_DB_PATH env var to override; otherwise default to ../cards-api/cards.db
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dbPath = process.env.CARDS_DB_PATH || path.join(__dirname, '..', 'cards-api', 'cards.db');
+console.log('Opening SQLite DB at', dbPath);
+const db = new Database(dbPath);
+
+// --- HTTP API ---
 const app = Fastify();
 
 // --- Health endpoint ---
@@ -32,14 +43,10 @@ app.get('/stats/cards/:id', async (req: any) => {
   };
 });
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-// Resolve a shared cards.db path so this worker opens the same DB the API created.
-// Use CARDS_DB_PATH env var to override; otherwise default to ../cards-api/cards.db
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dbPath = process.env.CARDS_DB_PATH || path.join(__dirname, '..', 'cards-api', 'cards.db');
-console.log('Opening SQLite DB at', dbPath);
-const db = new Database(dbPath);
+app.post('/stats/trigger', async () => {
+  await processBatch(); // Reuse the same function below
+  return { ok: true, message: 'Manual aggregation completed' };
+});
 
 // --- Start HTTP server ---
 app.listen({ port: 4000, host: '0.0.0.0' })
@@ -73,8 +80,8 @@ async function processBatch() {
   }
 }
 
-// async function loop() {
-//   while (true) await processBatch();
-// }
+async function loop() {
+  while (true) await processBatch();
+}
 
-// loop()
+loop()
