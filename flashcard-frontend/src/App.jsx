@@ -1,5 +1,7 @@
+import StudyPage from "./StudyPage";
+
 function App() {
-  return <div>Hello Vite!</div>;
+  return <StudyPage/>;
 }
 
 export default App;
