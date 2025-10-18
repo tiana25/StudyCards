@@ -21,9 +21,24 @@ db.prepare(`
 `).run();
 
 app.post('/cards', async (req: any) => {
-  const { front, back } = req.body;
-  db.prepare('INSERT INTO cards(front, back) VALUES (?, ?)').run(front, back);
-  return { status: 'ok', message: 'Card was added' }
+  const { front, back, cards } = req.body;
+  let added = 0;
+  if (Array.isArray(cards)) {
+    const stmt = db.prepare('INSERT INTO cards(front, back) VALUES (?, ?)');
+    for (const card of cards) {
+      if (card.front && card.back) {
+        stmt.run(card.front, card.back);
+        added++;
+      }
+    }
+    return { status: 'ok', message: `Added ${added} cards`, added };
+  } else if (front && back) {
+    db.prepare('INSERT INTO cards(front, back) VALUES (?, ?)').run(front, back);
+    added = 1;
+    return { status: 'ok', message: 'Card was added', added };
+  } else {
+    return { status: 'error', message: 'Missing card data' };
+  }
 })
 
 app.get('/cards/next', async () => {
