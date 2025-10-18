@@ -8,6 +8,7 @@ export default function UploadPage() {
   const [submitting, setSubmitting] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [message, setMessage] = useState(null);
+  const [bulkText, setBulkText] = useState("");
 
   const handleKeyPress = () => {
     console.log("Handle press");
@@ -41,6 +42,8 @@ export default function UploadPage() {
       setSubmitting(false);
     }
   };
+
+  const handleBulkUpload = () => {};
 
   return (
     <div className="w-full max-w-2xl">
@@ -85,45 +88,78 @@ export default function UploadPage() {
           </div>
         )}
 
-        <div>
-          <div className="mb-6">
-            <label className="block text-purple-300 text-sm font-medium mb-2">
-              Front (Question)
-            </label>
-            <input
-              type="text"
-              value={front}
-              onChange={(e) => setFront(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="e.g., hund"
-              className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-              disabled={submitting}
-            />
-          </div>
+        {!bulkMode ? (
+          <div>
+            <div className="mb-6">
+              <label className="block text-purple-300 text-sm font-medium mb-2">
+                Front (Question)
+              </label>
+              <input
+                type="text"
+                value={front}
+                onChange={(e) => setFront(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="e.g., hund"
+                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                disabled={submitting}
+              />
+            </div>
 
-          <div className="mb-6">
-            <label className="block text-purple-300 text-sm font-medium mb-2">
-              Back (Answer)
-            </label>
-            <input
-              type="text"
-              value={back}
-              onChange={(e) => setBack(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="e.g., dog"
-              className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-              disabled={submitting}
-            />
-          </div>
+            <div className="mb-6">
+              <label className="block text-purple-300 text-sm font-medium mb-2">
+                Back (Answer)
+              </label>
+              <input
+                type="text"
+                value={back}
+                onChange={(e) => setBack(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="e.g., dog"
+                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                disabled={submitting}
+              />
+            </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white text-lg font-medium rounded-xl transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            {submitting ? "Adding..." : "Add Card"}
-          </button>
-        </div>
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white text-lg font-medium rounded-xl transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {submitting ? "Adding..." : "Add Card"}
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div className="mb-4">
+              <label className="block text-purple-300 text-sm font-medium mb-2">
+                Bulk Cards (one per line, format: front | back)
+              </label>
+              <textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                placeholder="hund | dog&#10;katt | cat&#10;äpple | apple"
+                rows="10"
+                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all font-mono text-sm"
+                disabled={submitting}
+              />
+              <p className="text-gray-400 text-xs mt-2">
+                Format:{" "}
+                <code className="bg-gray-700 px-2 py-1 rounded">
+                  front | back
+                </code>{" "}
+                (one card per line)
+              </p>
+            </div>
+
+            <button
+              onClick={handleBulkUpload}
+              disabled={submitting}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white text-lg font-medium rounded-xl transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {submitting ? "Uploading..." : "Upload Cards"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
