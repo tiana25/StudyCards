@@ -42,12 +42,24 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-white text-4xl font-bold mb-2">Add New Cards</h1>
-          <p className="text-purple-300">Build your flashcard collection</p>
-        </div>
+    <div className="w-full max-w-2xl">
+      <div className="text-center mb-8">
+        <h1 className="text-white text-4xl font-bold mb-2">Add New Cards</h1>
+        <p className="text-purple-300">Build your flashcard collection</p>
+      </div>
+
+      <div className="bg-gray-800 rounded-2xl p-8 shadow-2xl shadow-purple-500/30 border border-gray-700">
+        {message && (
+          <div
+            className={`mb-6 p-4 rounded-lg ${
+              message.type === "success"
+                ? "bg-green-900/50 text-green-200 border border-green-700"
+                : "bg-red-900/50 text-red-200 border border-red-700"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
 
         <div>
           <div className="mb-6">
@@ -73,7 +85,7 @@ export default function UploadPage() {
               type="text"
               value={back}
               onChange={(e) => setBack(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               placeholder="e.g., dog"
               className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
               disabled={submitting}

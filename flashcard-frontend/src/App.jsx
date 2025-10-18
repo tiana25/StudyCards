@@ -14,7 +14,14 @@ function App() {
             </div>
           }
         />
-        <Route path="/upload" element={<UploadPage />} />
+        <Route
+          path="/upload"
+          element={
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center">
+              <UploadPage />
+            </div>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
