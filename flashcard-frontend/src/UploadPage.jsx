@@ -43,7 +43,53 @@ export default function UploadPage() {
     }
   };
 
-  const handleBulkUpload = () => {};
+  const handleBulkUpload = async () => {
+    if (!bulkText.trim()) {
+      setMessage({ type: "error", text: "Please enter some cards!" });
+      return;
+    }
+
+    setSubmitting(true);
+    setMessage(null);
+
+    try {
+      const lines = bulkText.trim().split("\n");
+      const cards = lines
+        .map((line) => {
+          const parts = line.split("|");
+          if (parts.length !== 2) return null;
+          const front = parts[0].trim();
+          const back = parts[1].trim();
+          return front && back ? { front, back } : null;
+        })
+        .filter(Boolean);
+
+      if (cards.length === 0) {
+        throw new Error("No valid cards found. Use format: front | back");
+      }
+
+      // Use bulk upload endpoint
+      const res = await fetch(`${API_BASE}/cards`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cards }),
+      });
+
+      if (!res.ok) throw new Error("Failed to upload cards");
+
+      setMessage({
+        type: "success",
+        text: `Successfully added ${cards.length} cards!`,
+      });
+      setBulkText("");
+
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err) {
+      setMessage({ type: "error", text: `Error: ${err.message}` });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-2xl">
