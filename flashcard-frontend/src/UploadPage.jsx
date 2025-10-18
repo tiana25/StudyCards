@@ -6,6 +6,7 @@ export default function UploadPage() {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [bulkMode, setBulkMode] = useState(false);
   const [message, setMessage] = useState(null);
 
   const handleKeyPress = () => {
@@ -46,6 +47,29 @@ export default function UploadPage() {
       <div className="text-center mb-8">
         <h1 className="text-white text-4xl font-bold mb-2">Add New Cards</h1>
         <p className="text-purple-300">Build your flashcard collection</p>
+      </div>
+
+      <div className="flex gap-2 mb-6 bg-gray-800 p-1 rounded-lg">
+        <button
+          onClick={() => setBulkMode(false)}
+          className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+            !bulkMode
+              ? "bg-purple-600 text-white"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          Single Card
+        </button>
+        <button
+          onClick={() => setBulkMode(true)}
+          className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+            bulkMode
+              ? "bg-purple-600 text-white"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          Bulk Upload
+        </button>
       </div>
 
       <div className="bg-gray-800 rounded-2xl p-8 shadow-2xl shadow-purple-500/30 border border-gray-700">
