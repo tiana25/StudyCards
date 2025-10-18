@@ -41,4 +41,7 @@ app.post('/cards/:id/review', async (req: any) => {
   return { ok: true };
 })
 
-app.listen({ port: 3000, host: '0.0.0.0' });
+// --- Start HTTP server ---
+app.listen({ port: 3000, host: '0.0.0.0' })
+  .then(() => console.log('Cards-api REST API running on port 3000'))
+  .catch(console.error)
