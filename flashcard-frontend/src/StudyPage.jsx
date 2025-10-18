@@ -31,8 +31,32 @@ export default function StudyPage() {
     }
   };
 
-  const handleReview = () => {
-    console.log("Review");
+  const handleReview = async (remembered) => {
+    if (submitting) return;
+
+    const currentCard = cards[currentIndex];
+    setSubmitting(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/cards/${currentCard.id}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remembered }),
+      });
+
+      if (!res.ok) throw new Error("Failed to submit review");
+
+      if (currentIndex < cards.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+        setShowAnswer(false);
+      } else {
+        setCurrentIndex(cards.length);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const currentCard = cards.length ? cards[currentIndex] : null;
@@ -57,6 +81,7 @@ export default function StudyPage() {
 
   return (
     <div className="w-full max-w-2xl">
+      {/** Progress Indicator */}
       <div className="text-center mb-6">
         <span className="text-purple-300 text-sm font-medium">
           Card {currentIndex + 1} of {cards.length}
@@ -69,6 +94,7 @@ export default function StudyPage() {
         </div>
       </div>
 
+      {/** Flashcard */}
       <div className="bg-gray-800 rounded-2xl p-12 shadow-2xl shadow-purple-500/30 border border-gray-700 min-h-[300px] flex flex-col items-center jsutify-center">
         <div className="text-center mb-8">
           <div className="text-white text-5xl font-bold mb-4">
@@ -115,6 +141,15 @@ export default function StudyPage() {
           </div>
         )}
       </div>
+
+      {/** Difficulty Indicator */}
+      {currentCard.difficulty !== undefined && (
+        <div className="text-center mt-4">
+          <span className="text-gray-400 text-xs">
+            Difficulty: {currentCard.difficulty.toFixed(1)}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
