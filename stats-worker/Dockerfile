@@ -14,5 +14,5 @@ COPY . .
 # Expose API port (for health endpoint and stats aggregate)
 EXPOSE 4000
 
-# Start the worker in dev mode with hot reload
-CMD ["nodemon", "--watch", ".", "--ext", "ts", "--exec", "node", "--loader", "ts-node/esm", "index.ts"]
+# Start the worker
+CMD ["node", "--loader", "ts-node/esm", "index.ts"]
