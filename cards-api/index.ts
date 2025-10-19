@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { Redis } from 'ioredis';
 import { createRequire } from 'module';
 import cors from '@fastify/cors'
+import path from 'path';
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
@@ -11,7 +12,11 @@ await app.register(cors, {
   origin: 'http://localhost:5173'
 })
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-const db = new Database('cards.db');
+
+// --- Resolve DB path (mounted PVC) ---
+const dbPath = process.env.CARDS_DB_PATH || 'cards.db';
+console.log('Using SQLite DB at', dbPath);
+const db = new Database(dbPath);
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS cards(id INTEGER PRIMARY KEY, front TEXT, back TEXT, difficulty REAL DEFAULT 0)
