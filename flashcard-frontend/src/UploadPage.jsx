@@ -207,6 +207,14 @@ export default function UploadPage() {
           </div>
         )}
       </div>
+      <div className="text-center mt-6">
+        <a
+          href="/"
+          className="text-purple-300 hover:text-purple-200 transition-colors"
+        >
+          ← Back to Study
+        </a>
+      </div>
     </div>
   );
 }
