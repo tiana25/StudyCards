@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const API_BASE = "http://localhost:3000"; //Backend url
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
 
 export default function StudyPage() {
   const [cards, setCards] = useState([]);
