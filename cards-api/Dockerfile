@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 3000
 
 # Start the API
-CMD ["nodemon", "--watch", ".", "--ext", "ts", "--exec", "node", "--loader", "ts-node/esm", "index.ts"]
+CMD [ "node", "--loader", "ts-node/esm", "index.ts"]
