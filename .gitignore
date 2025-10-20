@@ -13,8 +13,5 @@ dist/
 # Environment variables
 .env
 
-# TODOS left
-todo.txt
-
 # Databases
 *.db
