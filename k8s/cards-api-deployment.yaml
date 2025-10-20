@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cards-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cards-api
+  template:
+    metadata:
+      labels:
+        app: cards-api
+    spec:
+      containers:
+        - name: cards-api
+          image: tiana25/cards-api:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: REDIS_URL
+              value: redis://redis:6379
+            - name: CARDS_DB_PATH
+              value: /data/cards.db
+            - name: CORS_ORIGIN
+              value: "http://localhost:5173"
+          volumeMounts:
+            - name: cards-db
+              mountPath: /data
+      volumes:
+        - name: cards-db
+          persistentVolumeClaim:
+            claimName: cards-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cards-api
+spec:
+  type: NodePort
+  selector:
+    app: cards-api
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 31888
