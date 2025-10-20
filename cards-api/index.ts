@@ -15,6 +15,7 @@ await app.register(cors, {
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 // --- Resolve DB path (mounted PVC) ---
+const __dirname = path.dirname(__filename);
 const dbPath = process.env.CARDS_DB_PATH || path.join(__dirname, '..', 'data', 'cards.db');
 console.log('Using SQLite DB at', dbPath);
 const db = new Database(dbPath);
