@@ -2,6 +2,8 @@ import Fastify from 'fastify';
 import { Redis } from 'ioredis';
 import { createRequire } from 'module';
 import cors from '@fastify/cors'
+import path from 'path';
+
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
@@ -13,7 +15,7 @@ await app.register(cors, {
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 // --- Resolve DB path (mounted PVC) ---
-const dbPath = process.env.CARDS_DB_PATH || 'cards.db';
+const dbPath = process.env.CARDS_DB_PATH || path.join(__dirname, '..', 'data', 'cards.db');
 console.log('Using SQLite DB at', dbPath);
 const db = new Database(dbPath);
 
