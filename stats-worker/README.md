@@ -42,3 +42,8 @@ npm run dev
 - Add an HTTP health/metrics endpoint.
 - Use XREADGROUP and a consumer group with acknowledgements for reliable processing.
 - Add unit tests and CI.
+
+## Kubernetes deployment
+After Redis is deployed:
+`kubectl exec -it $(kubectl get pods -l app=redis -o jsonpath='{.items[0].metadata.name}') -- \
+  redis-cli XGROUP CREATE reviews stats-workers 0 MKSTREAM`
