@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stats-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stats-worker
+  template:
+    metadata:
+      labels:
+        app: stats-worker
+    spec:
+      containers:
+        - name: stats-worker
+          image: tiana25/stats-worker:latest
+          ports:
+            - containerPort: 4000
+          env:
+            - name: REDIS_URL
+              value: redis://redis:6379
+            - name: CARDS_DB_PATH
+              value: /data/cards.db
+          volumeMounts:
+            - name: cards-db
+              mountPath: /data
+      volumes:
+        - name: cards-db
+          persistentVolumeClaim:
+            claimName: cards-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stats-worker
+spec:
+  selector:
+    app: stats-worker
+  ports:
+    - port: 4000
+      targetPort: 4000
