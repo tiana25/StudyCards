@@ -77,11 +77,21 @@ export default function StudyPage() {
     );
   }
 
+  //No cards state
+  if (cards.length <= 0) {
+    return (
+      <div className="text-center">
+        <h2 className="text-white text-3xl font-bold mb-8">
+          Let's start by adding cards...
+        </h2>
+      </div>
+    );
+  }
+
   //Completion state
   if (currentIndex >= cards.length) {
     return (
       <div className="text-center">
-        <div className="text-6xl mb-6">Congrats!</div>
         <h2 className="text-white text-3xl font-bold mb-8">
           You're done for now!
         </h2>
