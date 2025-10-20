@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: stats-worker
 spec:
-  replicas: 1
+  replicas: 2  # HPA
   selector:
     matchLabels:
       app: stats-worker
@@ -22,6 +22,10 @@ spec:
               value: redis://redis:6379
             - name: CARDS_DB_PATH
               value: /data/cards.db
+            - name: WORKER_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           volumeMounts:
             - name: cards-db
               mountPath: /data
