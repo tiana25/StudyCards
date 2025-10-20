@@ -12,7 +12,7 @@ const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 // Use CARDS_DB_PATH env var to override; otherwise default to ../cards-api/cards.db
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbPath = process.env.CARDS_DB_PATH || path.join(__dirname, '..', 'cards-api', 'cards.db');
+const dbPath = process.env.CARDS_DB_PATH || path.join(__dirname, '..', 'data', 'cards.db');
 console.log('Opening SQLite DB at', dbPath);
 const db = new Database(dbPath);
 
@@ -53,35 +53,86 @@ app.listen({ port: 4000, host: '0.0.0.0' })
   .then(() => console.log('Stats-worker REST API running on port 4000'))
   .catch(console.error)
 
-// --- Worker logic ---
-async function processBatch() {
-  const res = await redis.xread('COUNT', 10, 'BLOCK', 5000, 'STREAMS', 'reviews', '0');
-  if (!res) return;
-  const stream = res[0];
-  if (!stream) return;
-  const [_, entries] = stream;
-  const updates = new Map<number, { correct: number; wrong: number; }>();
+const STREAM_NAME = 'reviews';
+const GROUP_NAME = 'stats-workers';
+const WORKER_ID = process.env.WORKER_ID || 'worker-1';
 
-  for (const [_, fields] of entries) {
+async function handleEntries(res: any) {
+  if (!res || !Array.isArray(res[0])) return;
+  const [_, entries] = res[0];
+  if (!entries || entries.length === 0) return;
+
+  // collect message IDs to ack after successful DB updates
+  const toAcknowledge: string[] = [];
+  // set of card IDs touched in this batch
+  const touched = new Set<number>();
+
+  for (const [msgId, fields] of entries) {
+    // example entry: [ '1760992343237-0', [ 'card_id', '2', 'remembered', '0' ]
+    // fields example: [ 'card_id', '2', 'remembered', '0' ]
     const cardId = Number(fields[1]);
-    const remembered = fields[3] === "1";
-    const stat = updates.get(cardId) || { correct: 0, wrong: 0 };
-    remembered ? stat.correct++ : stat.wrong++;
-    updates.set(cardId, stat)
+    touched.add(cardId);
+    toAcknowledge.push(msgId);
   }
 
-  // TODO: add unit tests for aggregation logic (happy path + zero-data path)
-  for (const [id, s] of updates) {
-    const total = s.correct + s.wrong;
-    // If there are no reviews, skip updating difficulty so the existing value is preserved.
-    if (total === 0) continue;
-    const diff = 100 * (1 - s.correct / total);
-    db.prepare('UPDATE cards SET difficulty = ? WHERE id = ?').run(diff, id);
+  // For each touched card, compute totals from DB
+  for (const cardId of touched) {
+    //card with <card_id> has been reviewed <total> times and correctly answered <correct_sum>.
+    const totalRow = db.prepare(
+      'SELECT COUNT(*) as total, SUM(result) as correct_sum FROM reviews WHERE card_id = ?'
+    ).get(cardId);
+
+    const total = totalRow?.total || 0;
+    const correct = totalRow?.correct_sum || 0;
+
+    if (total === 0) {
+      // no reviews yet — skip update
+      continue;
+    }
+
+    const difficulty = 100 * (1 - correct / total);
+
+    // update DB
+    try {
+      db.prepare('UPDATE cards SET difficulty = ? WHERE id = ?').run(difficulty, cardId);
+    } catch (err) {
+      console.error('DB update failed for card', cardId, err);
+      // If DB update fails, messages are not acknowledged, then they should be reprocessed later
+      return;
+    }
+  }
+
+  // All DB updates succeeded — acknowledge all message ids
+  for (const id of toAcknowledge) {
+    try {
+      await redis.xack(STREAM_NAME, GROUP_NAME, id);
+    } catch (err) {
+      console.error('Failed to xack', id, err);
+    }
   }
 }
 
+async function processBatch() {
+  // unread message fron the consumer group
+  const res = await redis.xreadgroup(
+    'GROUP', GROUP_NAME, WORKER_ID,
+    'COUNT', 10,
+    'BLOCK', 5000,
+    'STREAMS', STREAM_NAME, '>'
+  );
+  if (!res) return;
+  await handleEntries(res);
+}
+
 async function loop() {
-  while (true) await processBatch();
+  while (true) {
+    try {
+      await processBatch();
+    } catch (err) {
+      console.error('Worker loop error:', err);
+      await new Promise(r => setTimeout(r, 1000)); // wait on error
+    }
+  }
 }
 
 loop()
