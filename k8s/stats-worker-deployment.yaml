@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: stats-worker
 spec:
-  replicas: 2  # HPA
+  replicas: 2
   selector:
     matchLabels:
       app: stats-worker
