@@ -22,6 +22,10 @@
 - **Dev Tools:** TypeScript, ESLint, Nodemon
 - **Deployment:** Docker, Kubernetes
 
+## Microservices
+
+![Microservices Flow](StudyCards_Microservices.png)
+
 ## License
 
 This project is licensed under the [MIT License](./LICENSE).
